@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Martinsen Technologies — Software Architecture, DevOps & Infrastructure Consulting</title>
+    <meta name="description" content="Martinsen Technologies provides full-stack development, DevOps, infrastructure, and IoT systems consulting. We design, build, and deploy modern applications and containerized infrastructure for growing businesses.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface-hover: #1a1a25;
+            --border: #2a2a3a;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888a0;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-dim: rgba(99, 102, 241, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        a { color: inherit; text-decoration: none; }
+        .container { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; }
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #a78bfa 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-eyebrow { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; margin-bottom: 0.75rem; }
+        .section-title { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 3rem; }
+        @media (min-width: 768px) { .section-title { font-size: 2.25rem; } }
+
+        /* Nav */
+        nav.site-nav {
+            position: fixed; top: 0; width: 100%; z-index: 50;
+            background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(42, 42, 58, 0.5);
+        }
+        nav.site-nav .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; }
+        .brand { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.025em; }
+        .brand .accent { color: var(--accent); }
+        .nav-links { display: none; align-items: center; gap: 2rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .nav-links a { transition: color 0.2s ease; }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links .nav-cta { padding: 0.5rem 1rem; background: var(--accent-dim); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 0.5rem; color: var(--accent); }
+        .nav-links .nav-cta:hover { background: rgba(99, 102, 241, 0.2); color: var(--accent); }
+        .menu-toggle { display: block; background: none; border: 0; color: var(--text-secondary); cursor: pointer; padding: 0.25rem; }
+        .menu-toggle:hover { color: var(--text-primary); }
+        .mobile-menu { display: none; border-top: 1px solid rgba(42, 42, 58, 0.5); background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(16px); }
+        .mobile-menu.open { display: block; }
+        .mobile-menu .mobile-inner { display: flex; flex-direction: column; gap: 1rem; padding: 1rem 1.5rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .mobile-menu a:hover { color: var(--text-primary); }
+        @media (min-width: 768px) { .nav-links { display: flex; } .menu-toggle { display: none; } .mobile-menu { display: none !important; } }
+
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 6rem 1.5rem 4rem; text-align: center; }
+        .hero-pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; background: var(--accent-dim); border: 1px solid rgba(99, 102, 241, 0.2); color: var(--accent); font-size: 0.875rem; margin-bottom: 2rem; }
+        .status-dot { width: 0.5rem; height: 0.5rem; background: #4ade80; border-radius: 50%; animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } }
+        .hero h1 { font-size: 3rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 1.5rem; }
+        @media (min-width: 768px) { .hero h1 { font-size: 4.5rem; } }
+        .hero .tagline { font-size: 1.25rem; color: var(--text-secondary); font-weight: 300; max-width: 42rem; margin: 0 auto 1rem; }
+        @media (min-width: 768px) { .hero .tagline { font-size: 1.5rem; } }
+        .hero .subline { color: rgba(136, 136, 160, 0.7); max-width: 36rem; margin: 0 auto 3rem; }
+        .cta-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; }
+        @media (min-width: 640px) { .cta-row { flex-direction: row; } }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 2rem; border-radius: 0.5rem; font-size: 1rem; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2); }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); border-color: var(--border); }
+        .btn-ghost:hover { color: var(--text-primary); border-color: rgba(99, 102, 241, 0.5); }
+
+        /* Sections */
+        section { padding: 6rem 1.5rem; }
+        section.alt { background: rgba(18, 18, 26, 0.5); }
+
+        /* Service cards */
+        .services-grid { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .services-grid { grid-template-columns: repeat(2, 1fr); } }
+        .service-card { padding: 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; transition: all 0.3s ease; }
+        .service-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+        .service-icon { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; background: var(--accent-dim); display: inline-flex; align-items: center; justify-content: center; color: var(--accent); margin-bottom: 1.25rem; }
+        .service-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .service-card p { color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.95rem; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tag { display: inline-block; padding: 0.25rem 0.75rem; background: var(--accent-dim); border: 1px solid rgba(99, 102, 241, 0.2); color: #a78bfa; border-radius: 0.375rem; font-size: 0.8125rem; }
+
+        /* Case studies */
+        .case-grid { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .case-grid { grid-template-columns: repeat(2, 1fr); } }
+        .case-card { padding: 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; transition: all 0.3s ease; }
+        .case-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+        .case-badge { display: inline-block; padding: 0.25rem 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; border-radius: 0.25rem; border: 1px solid transparent; margin-bottom: 1rem; width: fit-content; }
+        .badge-prod { background: rgba(74, 222, 128, 0.1); color: #4ade80; border-color: rgba(74, 222, 128, 0.2); }
+        .badge-internal { background: rgba(99, 102, 241, 0.1); color: var(--accent); border-color: rgba(99, 102, 241, 0.2); }
+        .case-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .case-meta { color: var(--text-secondary); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem; }
+        .case-card p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.25rem; }
+        .case-results { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.25rem; }
+        .case-results li { color: var(--text-secondary); font-size: 0.9rem; display: flex; gap: 0.5rem; line-height: 1.5; }
+        .case-results li::before { content: "▸"; color: var(--accent); flex-shrink: 0; }
+
+        /* Timeline (experience) */
+        .timeline { position: relative; padding-left: 2rem; border-left: 2px solid rgba(99, 102, 241, 0.3); margin-left: 0.5rem; }
+        .timeline-item { position: relative; margin-bottom: 2rem; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot { position: absolute; left: -2rem; top: 1.75rem; transform: translateX(-50%); width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+        .timeline-card { padding: 1.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; transition: all 0.3s ease; }
+        .timeline-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+        .timeline-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        @media (min-width: 640px) { .timeline-head { flex-direction: row; justify-content: space-between; align-items: center; } }
+        .timeline-head h3 { font-size: 1.25rem; font-weight: 600; }
+        .timeline-head .company { color: var(--accent); }
+        .timeline-head .when { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+        .timeline-summary { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem; }
+        .timeline-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+        .timeline-list li { color: var(--text-secondary); font-size: 0.9rem; display: flex; gap: 0.5rem; line-height: 1.5; }
+        .timeline-list li::before { content: "▸"; color: var(--accent); flex-shrink: 0; }
+
+        /* Projects */
+        .projects-grid { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .projects-grid { grid-template-columns: repeat(2, 1fr); } }
+        .project-card { padding: 1.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; transition: all 0.3s ease; display: flex; flex-direction: column; }
+        .project-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+        .project-badge { display: inline-block; padding: 0.25rem 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; border-radius: 0.25rem; border: 1px solid transparent; margin-bottom: 1rem; width: fit-content; }
+        .badge-build { background: rgba(249, 115, 22, 0.1); color: #fb923c; border-color: rgba(249, 115, 22, 0.2); }
+        .badge-personal { background: var(--accent-dim); color: var(--accent); border-color: rgba(99, 102, 241, 0.2); }
+        .project-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .project-card p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.25rem; flex: 1; }
+
+        /* About */
+        .about-grid { display: grid; gap: 2rem; grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .about-grid { grid-template-columns: 1.4fr 1fr; align-items: start; } }
+        .about-prose p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+        .about-prose p:last-child { margin-bottom: 0; }
+        .about-stats { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+        .stat-card { padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+        .stat-value { font-size: 1.75rem; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #a78bfa 50%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.25rem; }
+        .stat-desc { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+        .education-row { display: grid; gap: 1.5rem; grid-template-columns: 1fr; margin-top: 2.5rem; }
+        @media (min-width: 768px) { .education-row { grid-template-columns: repeat(2, 1fr); } }
+        .edu-card { padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; }
+        .edu-card h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .edu-card .school { color: var(--accent); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .edu-card .when { color: var(--text-secondary); font-size: 0.875rem; }
+        .certs-block { margin-top: 1.5rem; padding: 1.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; }
+        .certs-block h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; }
+
+        /* Contact form */
+        .contact-wrap { text-align: center; }
+        .contact-wrap .lead { color: var(--text-secondary); max-width: 36rem; margin: 0 auto 3rem; }
+        .contact-form { max-width: 40rem; margin: 0 auto; text-align: left; }
+        .form-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+        @media (min-width: 640px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
+        .form-input, .form-textarea, .form-select {
+            padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 0.5rem; color: var(--text-primary); font-family: inherit; font-size: 0.95rem;
+            transition: border-color 0.2s ease;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--accent); }
+        .form-textarea { min-height: 7.5rem; resize: vertical; }
+        .form-submit { margin-top: 0.5rem; }
+        .form-success { display: none; padding: 1.5rem; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 0.5rem; color: #4ade80; text-align: center; margin-top: 1.5rem; }
+        .form-success.show { display: block; }
+
+        .contact-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; margin-top: 3rem; }
+        @media (min-width: 640px) { .contact-grid { grid-template-columns: repeat(3, 1fr); } }
+        .contact-card { padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; transition: all 0.3s ease; text-align: center; display: block; }
+        .contact-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+        .contact-icon { width: 3rem; height: 3rem; margin: 0 auto 0.75rem; border-radius: 0.5rem; background: var(--accent-dim); display: inline-flex; align-items: center; justify-content: center; color: var(--accent); }
+        .contact-card .label { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.25rem; }
+        .contact-card .value { color: var(--text-secondary); font-size: 0.8125rem; }
+
+        /* Footer */
+        footer.site-footer { padding: 2rem 1.5rem; border-top: 1px solid rgba(42, 42, 58, 0.5); }
+        footer.site-footer .footer-inner { max-width: 72rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: space-between; font-size: 0.875rem; color: rgba(136, 136, 160, 0.6); }
+        @media (min-width: 640px) { footer.site-footer .footer-inner { flex-direction: row; } }
+        footer.site-footer .tagline-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+
+        /* Fade-in */
+        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="site-nav">
+        <div class="container nav-inner">
+            <a href="#top" class="brand">
+                <span class="accent">&lt;</span>Martinsen<span class="accent">/&gt;</span>
+            </a>
+            <div class="nav-links">
+                <a href="#services">Services</a>
+                <a href="#case-studies">Case Studies</a>
+                <a href="#work">Work</a>
+                <a href="#about">About</a>
+                <a href="#contact" class="nav-cta">Get a Quote</a>
+            </div>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-inner">
+                <a href="#services">Services</a>
+                <a href="#case-studies">Case Studies</a>
+                <a href="#work">Work</a>
+                <a href="#about">About</a>
+                <a href="#contact">Get a Quote</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header id="top" class="hero">
+        <div class="container">
+            <div class="hero-pill">
+                <span class="status-dot"></span>
+                Available for contract work
+            </div>
+            <h1>
+                Martinsen<br><span class="gradient-text">Technologies</span>
+            </h1>
+            <p class="tagline">
+                Software architecture, DevOps, and infrastructure consulting for growing businesses.
+            </p>
+            <p class="subline">
+                We design, build, and deploy modern web applications, containerized infrastructure, and IoT data pipelines — from database schema to production.
+            </p>
+            <div class="cta-row">
+                <a href="#contact" class="btn btn-primary">Get a Quote</a>
+                <a href="#case-studies" class="btn btn-ghost">View Case Studies</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services -->
+    <section id="services">
+        <div class="container">
+            <div class="fade-in">
+                <p class="section-eyebrow">01 — Services</p>
+                <h2 class="section-title">What we <span class="gradient-text">build</span></h2>
+            </div>
+            <div class="services-grid fade-in">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                    </div>
+                    <h3>Full-Stack Development</h3>
+                    <p>Modern web applications from database to UI. Production-ready backends, responsive frontends, and the integrations that tie them together.</p>
+                    <div class="tag-list">
+                        <span class="tag">Go</span>
+                        <span class="tag">React 19</span>
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">Python</span>
+                        <span class="tag">REST APIs</span>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
+                    </div>
+                    <h3>DevOps &amp; Infrastructure</h3>
+                    <p>Containerized deployments, automated CI/CD, and Linux server management. Repeatable infrastructure that ships reliably across environments.</p>
+                    <div class="tag-list">
+                        <span class="tag">Docker</span>
+                        <span class="tag">CI/CD</span>
+                        <span class="tag">Linux</span>
+                        <span class="tag">Cloudflare</span>
+                        <span class="tag">Nginx</span>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h3>IoT &amp; Edge Systems</h3>
+                    <p>Device data pipelines, building management integrations, and edge infrastructure. Reliable ingest from industrial protocols through to backend services and operator tooling.</p>
+                    <div class="tag-list">
+                        <span class="tag">BACnet</span>
+                        <span class="tag">MQTT</span>
+                        <span class="tag">Edge Agents</span>
+                        <span class="tag">Network Capture</span>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h3>AI Systems Integration</h3>
+                    <p>Local LLM deployment, vector search, agent frameworks, and speech pipelines. Production-grade AI infrastructure with privacy, persistence, and control.</p>
+                    <div class="tag-list">
+                        <span class="tag">Local LLMs</span>
+                        <span class="tag">Vector Search</span>
+                        <span class="tag">Agents</span>
+                        <span class="tag">STT / TTS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Studies -->
+    <section id="case-studies" class="alt">
+        <div class="container">
+            <div class="fade-in">
+                <p class="section-eyebrow">02 — Case Studies</p>
+                <h2 class="section-title">Proven <span class="gradient-text">results</span></h2>
+            </div>
+            <div class="case-grid fade-in">
+                <div class="case-card">
+                    <span class="case-badge badge-prod">PRODUCTION</span>
+                    <h3>IoT Platform Deployment &amp; Infrastructure</h3>
+                    <p class="case-meta">Docker Swarm · Go · ClickHouse · Cisco · Ansible</p>
+                    <p>Architected and deployed a containerized IoT data pipeline processing live industrial device data at a major enterprise facility. Replaced manual deployment with a fully automated Docker Swarm stack, reducing setup time from hours to minutes.</p>
+                    <ul class="case-results">
+                        <li>Designed multi-service Docker Swarm deployment with self-healing, branded private registry, and license-based image distribution</li>
+                        <li>Built automated installation wizard (Go/Bubble Tea) that handles full stack deployment — Docker, Swarm init, TLS certs, ClickHouse, and service configuration — in a single interactive flow</li>
+                        <li>Implemented network packet capture pipeline (ERSPAN/BACnet) with multi-vendor switch support (Cisco App Hosting + external compute)</li>
+                        <li>Created Ansible playbooks for remote switch configuration, diagnostics, and packet capture comparison</li>
+                        <li>Added self-healing health monitor that auto-recovers missing services within 60 seconds</li>
+                    </ul>
+                </div>
+                <div class="case-card">
+                    <span class="case-badge badge-prod">PRODUCTION</span>
+                    <h3>Customer Portal &amp; Licensing System</h3>
+                    <p class="case-meta">Go · Echo · PostgreSQL · React · Docker · Cloudflare</p>
+                    <p>Built a full customer portal from scratch — account management, license generation with Ed25519 cryptographic signing, tiered pricing, download distribution with SHA256 integrity verification, and a private Docker registry with JWT-based authentication.</p>
+                    <ul class="case-results">
+                        <li>Implemented Ed25519 license signing and verification pipeline with tiered enforcement (active, grace period, degraded, shutdown)</li>
+                        <li>Built admin dashboard with revenue metrics, customer detail views, sortable/filterable tables, and inline license management</li>
+                        <li>Designed private Docker registry with license-key authentication — customers pull images using their license as credentials</li>
+                        <li>Added SHA256 checksums and per-download integrity verification for air-gapped installations</li>
+                        <li>Configured Cloudflare DNS, TLS, and reverse proxy for multi-service routing</li>
+                    </ul>
+                </div>
+                <div class="case-card">
+                    <span class="case-badge badge-internal">INTERNAL</span>
+                    <h3>County-Wide Internal Tools Platform</h3>
+                    <p class="case-meta">Go · SQL Server · React · Docker · CI/CD</p>
+                    <p>Architected and delivered internal tools for county-wide capital project management, replacing manual Word/email workflows with a secure database-driven application serving 200+ users across 20 departments.</p>
+                    <ul class="case-results">
+                        <li>Replaced manual Word-based submission process with secure, database-driven workflow</li>
+                        <li>Led backend migration from Node.js to Go for maintainability and scalability</li>
+                        <li>Designed SQL Server database with stored procedures, triggers, and historical auditing</li>
+                        <li>Built Dockerized dev and production environments with GitHub Actions CI/CD</li>
+                        <li>Implemented Redis caching and optimized backend for multi-department usage</li>
+                    </ul>
+                </div>
+                <div class="case-card">
+                    <span class="case-badge badge-prod">PRODUCTION</span>
+                    <h3>Management Console &amp; Real-Time Monitoring</h3>
+                    <p class="case-meta">React 19 · TypeScript · Vite · TanStack Router · Tailwind v4</p>
+                    <p>Built a real-time management console for monitoring IoT device health, alert management, and network topology visualization. Includes license status banners, device management with endpoint cap enforcement, and automated deployment tooling.</p>
+                    <ul class="case-results">
+                        <li>Modernized legacy single-HTML frontend to React 19 with TypeScript, TanStack Router, and Tailwind CSS v4</li>
+                        <li>Implemented real-time device health monitoring with auto-refreshing dashboards</li>
+                        <li>Added license status banner with tier, endpoint usage, and expiry countdown</li>
+                        <li>Designed Docker-in-Docker development environment with 5+ services and automated CI/CD</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Selected Work (Experience) -->
+    <section id="work">
+        <div class="container">
+            <div class="fade-in">
+                <p class="section-eyebrow">03 — Work</p>
+                <h2 class="section-title">Recent <span class="gradient-text">engagements</span></h2>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item fade-in">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-card">
+                        <div class="timeline-head">
+                            <div>
+                                <h3>Full-Stack Software Engineer — Backend &amp; Systems Architecture</h3>
+                                <p class="company">IoT Platform Startup</p>
+                            </div>
+                            <span class="when">Dec 2025 — Present</span>
+                        </div>
+                        <p class="timeline-summary">
+                            Own deployment infrastructure, frontend modernization, customer portal, licensing, and production reliability for an IoT platform processing live industrial device data across enterprise network infrastructure.
+                        </p>
+                        <ul class="timeline-list">
+                            <li>Replaced manual deployment process with Docker-based infrastructure for repeatable customer deployments.</li>
+                            <li>Supported first production deployment at a major enterprise facility, processing live device data across network switch infrastructure.</li>
+                            <li>Built management console frontend in React 19, TypeScript, TanStack Router, Vite 7, and Tailwind CSS v4.</li>
+                            <li>Designed Docker-in-Docker development environment with 5+ services and GitHub Actions CI/CD.</li>
+                            <li>Configured Cloudflare DNS, subdomain routing, and reverse-proxy/VPS traffic for customer portal, marketing site, and internal services.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-item fade-in">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-card">
+                        <div class="timeline-head">
+                            <div>
+                                <h3>Software Developer (Full-Stack)</h3>
+                                <p class="company">Contra Costa County Public Works</p>
+                            </div>
+                            <span class="when">Jul 2024 — Apr 2026</span>
+                        </div>
+                        <p class="timeline-summary">
+                            Architected and delivered internal tools for county-wide capital project management, replacing manual Word/email workflows with a secure database-driven application serving 200+ users across 20 departments.
+                        </p>
+                        <ul class="timeline-list">
+                            <li>Designed and deployed a production internal tooling platform replacing manual Word/email-based workflows.</li>
+                            <li>Led backend migration from Node.js to Go to improve maintainability, permissions modeling, and scalability.</li>
+                            <li>Designed SQL Server database with stored procedures, triggers, and historical auditing.</li>
+                            <li>Built Dockerized development and production environments with GitHub Actions CI/CD.</li>
+                            <li>Created custom SQL migration tool for versioned schema updates across environments.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-item fade-in">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-card">
+                        <div class="timeline-head">
+                            <div>
+                                <h3>Self-Employed Contractor</h3>
+                                <p class="company">Martinsen Technologies</p>
+                            </div>
+                            <span class="when">Jun 2020 — Oct 2025</span>
+                        </div>
+                        <p class="timeline-summary">
+                            Operated an independent contracting business serving residential and commercial clients across the San Francisco Bay Area.
+                        </p>
+                        <ul class="timeline-list">
+                            <li>Managed all aspects of a solo business including client acquisition, estimation, scheduling, and execution.</li>
+                            <li>Specialized in custom metal fabrication and welding — gates, railings, and structural components.</li>
+                            <li>Handled residential remodeling from emergency repairs to month-long full renovations.</li>
+                            <li>Maintained a repeat client base over five years through clear communication and reliable delivery.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects" class="alt">
+        <div class="container">
+            <div class="fade-in">
+                <p class="section-eyebrow">04 — Projects</p>
+                <h2 class="section-title">Beyond the <span class="gradient-text">work</span></h2>
+            </div>
+            <div class="projects-grid">
+                <div class="project-card fade-in">
+                    <span class="project-badge badge-personal">PERSONAL</span>
+                    <h3>Local AI Systems &amp; Agent Memory Lab</h3>
+                    <p>Self-directed build-out of a local LLM stack — inference, embeddings, reranking, STT/TTS, and agent frameworks — alongside persistent memory experiments using PostgreSQL, vector search, and graph-based retrieval.</p>
+                    <div class="tag-list">
+                        <span class="tag">Local LLMs</span>
+                        <span class="tag">Vector Search</span>
+                        <span class="tag">STT / TTS</span>
+                        <span class="tag">Agent Frameworks</span>
+                        <span class="tag">PostgreSQL</span>
+                    </div>
+                </div>
+                <div class="project-card fade-in">
+                    <span class="project-badge badge-personal">PERSONAL</span>
+                    <h3>Self-Hosted Infrastructure</h3>
+                    <p>Self-hosted infrastructure running multiple services across Docker, with Linux networking, Cloudflare Tunnel, Tailscale VPN, and continuous integration for open-source tooling.</p>
+                    <div class="tag-list">
+                        <span class="tag">Docker</span>
+                        <span class="tag">Tailscale</span>
+                        <span class="tag">Linux</span>
+                        <span class="tag">Cloudflare</span>
+                    </div>
+                </div>
+                <div class="project-card fade-in">
+                    <span class="project-badge badge-personal">PERSONAL</span>
+                    <h3>Keybind Manager</h3>
+                    <p>Desktop application (Python + Tkinter) for editing and transferring game configuration files between titles, with file parsing, GUI design, and trigonometric FOV sensitivity synchronization.</p>
+                    <div class="tag-list">
+                        <span class="tag">Python</span>
+                        <span class="tag">Tkinter</span>
+                        <span class="tag">Desktop</span>
+                    </div>
+                </div>
+                <div class="project-card fade-in">
+                    <span class="project-badge badge-build">BUILD</span>
+                    <h3>Lexus SC400 Drag Build</h3>
+                    <p>Full engine rebuild and custom fabrication on a Lexus SC400 platform built for drag racing — custom wiring and tuning. The same systems-thinking applied to metal instead of code.</p>
+                    <div class="tag-list">
+                        <span class="tag">Engine Rebuild</span>
+                        <span class="tag">Fabrication</span>
+                        <span class="tag">Tuning</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+        <div class="container">
+            <div class="fade-in">
+                <p class="section-eyebrow">05 — About</p>
+                <h2 class="section-title">The <span class="gradient-text">operator</span></h2>
+            </div>
+            <div class="about-grid fade-in">
+                <div class="about-prose">
+                    <p>
+                        Martinsen Technologies is led by Nicholai Martinsen — a full-stack engineer with production experience designing, building, and deploying modern web applications, internal tools, and containerized infrastructure from the ground up. Skilled across backend systems, database architecture, React/TypeScript frontends, Dockerized deployments, and CI/CD.
+                    </p>
+                    <p>
+                        Before software, Nicholai spent five years as his own general contractor — running a solo business across the San Francisco Bay Area handling home renovations, remodels, custom metal fabrication, welding, and handyman work. Projects ranged from one-hour emergency repairs to month-long full renovations.
+                    </p>
+                    <p>
+                        That contractor background is what shapes the company: figure out what's actually needed, build it right, and ship it. The same pragmatism that delivered a custom gate on-site shows up in how backend systems and deployment pipelines get designed.
+                    </p>
+                    <p>
+                        Currently relocating to the Reno/Tahoe area, with long-term plans to settle in southeast Alaska. Available for remote contract work worldwide, with on-site availability in the SF Bay Area, Reno/Tahoe, and the Pacific Northwest.
+                    </p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">200+</div>
+                        <div class="stat-desc">Users across 20 county departments on a solo-designed full-stack system</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Production</div>
+                        <div class="stat-desc">Live enterprise deployment processing real industrial device data</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">5+ Years</div>
+                        <div class="stat-desc">Running a solo contracting business before transitioning to software</div>
+                    </div>
+                </div>
+            </div>
+            <div class="education-row fade-in">
+                <div class="edu-card">
+                    <h3>B.S. Computer Science</h3>
+                    <p class="school">California State University, Monterey Bay</p>
+                    <p class="when">Fall 2025 · GPA 3.98</p>
+                </div>
+                <div class="edu-card">
+                    <h3>A.S. Computer Science</h3>
+                    <p class="school">Diablo Valley College</p>
+                    <p class="when">Spring 2023</p>
+                </div>
+            </div>
+            <div class="certs-block fade-in">
+                <h3>Certifications</h3>
+                <div class="tag-list">
+                    <span class="tag">IBM z/OS Mainframe Practitioner</span>
+                    <span class="tag">Enterprise Design Thinking Practitioner</span>
+                    <span class="tag">Agile Explorer</span>
+                    <span class="tag">IBM z Xplore</span>
+                    <span class="tag">New Collar Professional Skills</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="alt">
+        <div class="container contact-wrap">
+            <div class="fade-in">
+                <p class="section-eyebrow">06 — Contact</p>
+                <h2 class="section-title">Let's <span class="gradient-text">work together</span></h2>
+                <p class="lead">
+                    Currently taking on contract engagements in full-stack development, DevOps, IoT/edge systems, and AI infrastructure. Remote and on-site in the SF Bay Area, Reno/Tahoe, and Pacific Northwest.
+                </p>
+            </div>
+            <form class="contact-form fade-in" id="contact-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" class="form-input" required placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" required placeholder="you@company.com">
+                    </div>
+                    <div class="form-group full">
+                        <label for="company">Company</label>
+                        <input type="text" id="company" name="company" class="form-input" placeholder="Company name (optional)">
+                    </div>
+                    <div class="form-group full">
+                        <label for="service">What do you need?</label>
+                        <select id="service" name="service" class="form-select">
+                            <option value="">Select a service...</option>
+                            <option value="full-stack">Full-Stack Development</option>
+                            <option value="devops">DevOps &amp; Infrastructure</option>
+                            <option value="iot">IoT &amp; Edge Systems</option>
+                            <option value="ai">AI Systems Integration</option>
+                            <option value="other">Something Else</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label for="message">Project details</label>
+                        <textarea id="message" name="message" class="form-textarea" required placeholder="Tell me about your project — what you're building, timeline, budget range..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary form-submit">Send Message</button>
+                <div class="form-success" id="form-success">
+                    Thanks for reaching out. I'll get back to you within 24 hours.
+                </div>
+            </form>
+            <div class="contact-grid fade-in">
+                <a href="mailto:nicholai@martinsen.dev" class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <div class="label">Email</div>
+                    <div class="value">nicholai@martinsen.dev</div>
+                </a>
+                <a href="https://linkedin.com/in/nicholai-martinsen" target="_blank" rel="noopener" class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </div>
+                    <div class="label">LinkedIn</div>
+                    <div class="value">/in/nicholai-martinsen</div>
+                </a>
+                <a href="https://github.com/Nicfox77" target="_blank" rel="noopener" class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </div>
+                    <div class="label">GitHub</div>
+                    <div class="value">/Nicfox77</div>
+                </a>
+            </div>
+            <div style="margin-top: 2.5rem;">
+                <a href="Nicholai_Martinsen_Resume.pdf" download class="btn btn-ghost">Download Resume (PDF)</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>&copy; 2026 Martinsen Technologies LLC</p>
+            <p class="tagline-mono">Built with intention</p>
+        </div>
+    </footer>
+
+    <script>
+        const toggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        toggle.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', String(isOpen));
+        });
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // Contact form (mailto fallback — no backend needed)
+        const form = document.getElementById('contact-form');
+        const success = document.getElementById('form-success');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const company = document.getElementById('company').value;
+            const service = document.getElementById('service').value;
+            const message = document.getElementById('message').value;
+
+            const subject = encodeURIComponent(`New inquiry from ${name}${company ? ' (' + company + ')' : ''}`);
+            const body = encodeURIComponent(
+                `Name: ${name}\nEmail: ${email}\nCompany: ${company || 'N/A'}\nService: ${service || 'N/A'}\n\n${message}`
+            );
+            window.location.href = `mailto:nicholai@martinsen.dev?subject=${subject}&body=${body}`;
+            success.classList.add('show');
+            form.reset();
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
